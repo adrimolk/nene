@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Psico-Tech PDF Synapse</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- ESTÉTICA PSICO-TECH --- */
+        :root {
+            --brain-pink: #f472b6;
+            --tech-purple: #6d28d9;
+            --deep-blue: #1e1b4b;
+            --synapse-yellow: #facc15;
+            --neuron-cyan: #22d3ee;
+        }
+
+        body {
+            font-family: 'Quicksand', sans-serif;
+            background: radial-gradient(circle at center, #312e81 0%, #0f172a 100%);
+            color: #e2e8f0;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Patrón de fondo estilo red neuronal */
+        .bg-pattern {
+            background-image: radial-gradient(rgba(99, 102, 241, 0.15) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+
+        /* --- ANIMACIONES --- */
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 10px var(--neuron-cyan); }
+            50% { box-shadow: 0 0 25px var(--neuron-cyan), 0 0 10px var(--synapse-yellow); }
+        }
+
+        .mascot-float {
+            animation: float 4s ease-in-out infinite;
+        }
+
+        /* Zona de carga activa */
+        .drag-active {
+            border-color: var(--synapse-yellow) !important;
+            background-color: rgba(109, 40, 217, 0.2);
+            transform: scale(1.02);
+        }
+
+        .drag-active .mascot-eyes {
+            fill: var(--synapse-yellow); /* Ojos brillan al arrastrar */
+        }
+
+        /* Tarjetas de Memoria (Archivos) */
+        .memory-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .memory-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--neuron-cyan);
+            box-shadow: 0 10px 30px rgba(34, 211, 238, 0.15);
+        }
+
+        /* Barra de progreso Neuronal */
+        .synapse-loader {
+            display: none;
+            width: 100%;
+            height: 8px;
+            background: #1e1b4b;
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+            margin-top: 1rem;
+        }
+
+        .synapse-spark {
+            width: 50%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, var(--synapse-yellow), var(--neuron-cyan), transparent);
+            position: absolute;
+            animation: synapse-move 1.5s infinite linear;
+        }
+
+        @keyframes synapse-move {
+            0% { left: -50%; }
+            100% { left: 100%; }
+        }
+
+        /* Scrollbar personalizada */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #4c1d95; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #6d28d9; }
+    </style>
+</head>
+<body class="bg-pattern p-4 md:p-10">
+
+    <div class="max-w-5xl mx-auto">
+        
+        <header class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 mb-2">
+                Psico<span class="text-yellow-400">Box</span>
+            </h1>
+            <p class="text-slate-400 text-lg">Almacenamiento Persistente de Conocimiento</p>
+        </header>
+
+        <div id="drop-zone" class="relative group border-4 border-dashed border-indigo-500/50 rounded-[3rem] p-10 text-center transition-all duration-300 bg-slate-900/40 cursor-pointer overflow-hidden">
+            <input type="file" id="file-input" class="hidden" multiple accept="application/pdf">
+            
+            <div class="mascot-float w-48 h-48 mx-auto relative z-10">
+                <svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-2xl">
+                    <path d="M 40 120 Q 20 140 10 180" stroke="#4b5563" stroke-width="4" fill="none" />
+                    <rect x="5" y="180" width="10" height="15" fill="#9ca3af" rx="2" />
+                    <path d="M 160 120 Q 180 140 190 180" stroke="#4b5563" stroke-width="4" fill="none" />
+                    <rect x="185" y="180" width="10" height="15" fill="#9ca3af" rx="2" />
+
+                    <path d="M 50 100 C 30 100 20 70 50 50 C 60 20 100 10 120 30 C 150 10 180 40 170 80 C 190 100 170 130 140 130 L 60 130 C 30 130 30 100 50 100 Z" 
+                          fill="#f9a8d4" stroke="#be185d" stroke-width="3" />
+                    
+                    <path d="M 90 30 Q 100 60 80 80" stroke="#be185d" stroke-width="2" fill="none" opacity="0.5"/>
+                    <path d="M 120 30 Q 110 60 130 80" stroke="#be185d" stroke-width="2" fill="none" opacity="0.5"/>
+
+                    <circle cx="75" cy="90" r="18" fill="#bae6fd" stroke="#000" stroke-width="4" opacity="0.9" />
+                    <circle cx="125" cy="90" r="18" fill="#bae6fd" stroke="#000" stroke-width="4" opacity="0.9" />
+                    <line x1="93" y1="90" x2="107" y2="90" stroke="#000" stroke-width="4" />
+
+                    <circle class="mascot-eyes transition-colors duration-300" cx="75" cy="90" r="5" fill="#1e1b4b" />
+                    <circle class="mascot-eyes transition-colors duration-300" cx="125" cy="90" r="5" fill="#1e1b4b" />
+
+                    <path id="mouth" d="M 85 115 Q 100 125 115 115" stroke="#be185d" stroke-width="3" fill="none" stroke-linecap="round" />
+
+                    <path d="M 60 130 L 60 150 L 140 150 L 140 130 Z" fill="#fff" stroke="#cbd5e1" stroke-width="2" />
+                    <line x1="100" y1="130" x2="100" y2="150" stroke="#cbd5e1" stroke-width="2" />
+                </svg>
+            </div>
+
+            <div class="relative -mt-4 z-20">
+                <div class="bg-white text-slate-800 px-6 py-3 rounded-2xl rounded-tl-none inline-block font-bold shadow-lg border-2 border-slate-200">
+                    <span id="mascot-text">¡Alimenta mi mente con tus PDFs! 🧠</span>
+                </div>
+            </div>
+            
+            <p class="mt-6 text-slate-400 text-sm">Arrastra archivos aquí o haz click para explorar</p>
+
+            <div id="loader" class="synapse-loader max-w-md mx-auto">
+                <div class="synapse-spark"></div>
+            </div>
+        </div>
+
+        <h2 class="text-2xl font-bold text-slate-200 mt-12 mb-6 flex items-center gap-3">
+            <span class="text-3xl">📂</span> Memoria a Largo Plazo
+        </h2>
+        
+        <div id="file-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
+        
+        <div id="empty-state" class="hidden text-center py-10 opacity-50">
+            <p class="text-xl text-purple-300">Mis neuronas están vacías... sube algo.</p>
+        </div>
+
+    </div>
+
+    <div id="toast" class="fixed bottom-5 right-5 bg-red-500 text-white px-6 py-4 rounded-xl shadow-2xl transform translate-y-20 transition-transform duration-300 flex items-center gap-3 z-50">
+        <span class="text-2xl">⚠️</span>
+        <div>
+            <h4 class="font-bold">Error de Sinapsis</h4>
+            <p id="toast-msg" class="text-sm">El archivo es demasiado grande.</p>
+        </div>
+    </div>
+
+    <script>
+        // --- CONFIGURACIÓN INDEXEDDB ---
+        const DB_NAME = "PsicoPDF_DB";
+        const STORE_NAME = "memories";
+        let db;
+
+        // Inicializar DB
+        const request = indexedDB.open(DB_NAME, 1);
+
+        request.onupgradeneeded = (e) => {
+            db = e.target.result;
+            // Creamos el almacén. keyPath 'id' auto incrementable
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+                db.createObjectStore(STORE_NAME, { keyPath: "id", autoIncrement: true });
+            }
+        };
+
+        request.onsuccess = (e) => {
+            db = e.target.result;
+            console.log("Cerebro conectado: Base de datos lista.");
+            loadFiles(); // Cargar archivos al abrir
+        };
+
+        request.onerror = (e) => {
+            console.error("Fallo cerebral:", e.target.error);
+        };
+
+        // --- LÓGICA DE UI Y EVENTOS ---
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const mascotText = document.getElementById('mascot-text');
+        const mouth = document.getElementById('mouth');
+        const loader = document.getElementById('loader');
+        const toast = document.getElementById('toast');
+        const toastMsg = document.getElementById('toast-msg');
+
+        // Drag & Drop visuales
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('drag-active');
+            mascotText.innerText = "¡Sí! ¡Conocimiento entrante!";
+            mouth.setAttribute('d', 'M 85 115 Q 100 135 115 115'); // Boca abierta 'O'
+        });
+
+        dropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-active');
+            mascotText.innerText = "¡Alimenta mi mente con tus PDFs! 🧠";
+            mouth.setAttribute('d', 'M 85 115 Q 100 125 115 115'); // Sonrisa normal
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-active');
+            mouth.setAttribute('d', 'M 85 115 Q 100 125 115 115');
+            const files = e.dataTransfer.files;
+            handleFiles(files);
+        });
+
+        fileInput.addEventListener('change', (e) => handleFiles(e.target.files));
+
+        // Manejo de archivos
+        async function handleFiles(files) {
+            if (files.length === 0) return;
+            
+            loader.style.display = 'block';
+            mascotText.innerText = "Procesando sinapsis...";
+
+            for (const file of files) {
+                if (file.type === 'application/pdf') {
+                    try {
+                        await saveFileToDB(file);
+                    } catch (error) {
+                        showError("No se pudo guardar " + file.name + ". Posiblemente falta espacio.");
+                    }
+                } else {
+                    showError("¡Oye! Solo como PDFs. " + file.name + " no es válido.");
+                }
+            }
+
+            // Simular un pequeño retardo para ver la animación
+            setTimeout(() => {
+                loader.style.display = 'none';
+                mascotText.innerText = "¡Guardado en el córtex!";
+                loadFiles();
+                setTimeout(() => mascotText.innerText = "¡Alimenta mi mente con tus PDFs! 🧠", 2000);
+            }, 800);
+        }
+
+        // --- OPERACIONES DB ---
+
+        function saveFileToDB(file) {
+            return new Promise((resolve, reject) => {
+                const transaction = db.transaction([STORE_NAME], "readwrite");
+                const store = transaction.objectStore(STORE_NAME);
+
+                const memory = {
+                    name: file.name,
+                    size: file.size,
+                    type: file.type,
+                    blob: file, // Guardamos el Blob binario real
+                    created: new Date().toLocaleDateString()
+                };
+
+                const request = store.add(memory);
+
+                request.onsuccess = () => resolve();
+                
+                // MANEJO DE ERRORES (LETRA CHICA)
+                request.onerror = (e) => {
+                    // El error más común aquí es QuotaExceededError si el PDF es gigante
+                    console.error("Error guardando:", e.target.error);
+                    reject(e.target.error);
+                };
+            });
+        }
+
+        function loadFiles() {
+            const grid = document.getElementById('file-grid');
+            const emptyState = document.getElementById('empty-state');
+            grid.innerHTML = '';
+
+            const transaction = db.transaction([STORE_NAME], "readonly");
+            const store = transaction.objectStore(STORE_NAME);
+            const request = store.getAll();
+
+            request.onsuccess = () => {
+                const memories = request.result;
+                
+                if (memories.length === 0) {
+                    emptyState.classList.remove('hidden');
+                } else {
+                    emptyState.classList.add('hidden');
+                    // Ordenar por ID descendente (más nuevo primero)
+                    memories.reverse().forEach(mem => createCard(mem));
+                }
+            };
+        }
+
+        function deleteFile(id) {
+            if(!confirm("¿Borrar este recuerdo? Se perderá para siempre.")) return;
+
+            const transaction = db.transaction([STORE_NAME], "readwrite");
+            const store = transaction.objectStore(STORE_NAME);
+            store.delete(id);
+
+            transaction.oncomplete = () => loadFiles();
+        }
+
+        // --- RENDERIZADO DE TARJETAS ---
+        function createCard(memory) {
+            const grid = document.getElementById('file-grid');
+            const fileUrl = URL.createObjectURL(memory.blob);
+            
+            const card = document.createElement('div');
+            card.className = 'memory-card rounded-2xl p-5 flex flex-col justify-between relative overflow-hidden group';
+            card.style.minHeight = '180px';
+
+            // Decoración aleatoria (iconos mentales)
+            const icons = ['💡', '🧩', '🛋️', '🔍', '🧠'];
+            const randomIcon = icons[memory.id % icons.length];
+
+            card.innerHTML = `
+                <div class="absolute top-0 right-0 p-3 opacity-20 text-4xl group-hover:scale-125 transition-transform duration-500">
+                    ${randomIcon}
+                </div>
+                
+                <div>
+                    <div class="flex items-center gap-2 mb-3">
+                        <div class="w-3 h-3 rounded-full bg-cyan-400 shadow-[0_0_10px_#22d3ee]"></div>
+                        <span class="text-xs text-cyan-200 uppercase tracking-widest font-bold">Sinapsis #${memory.id}</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white leading-tight mb-1 break-words line-clamp-2" title="${memory.name}">
+                        ${memory.name}
+                    </h3>
+                    <p class="text-xs text-slate-400">${(memory.size / 1024 / 1024).toFixed(2)} MB • ${memory.created}</p>
+                </div>
+
+                <div class="mt-6 flex gap-3 z-10">
+                    <a href="${fileUrl}" target="_blank" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-bold py-2 px-4 rounded-lg text-center transition-colors shadow-lg shadow-indigo-500/30 flex items-center justify-center gap-2">
+                        <span>👁️</span> Analizar
+                    </a>
+                    <button onclick="deleteFile(${memory.id})" class="bg-slate-700 hover:bg-red-500/80 text-white p-2 rounded-lg transition-colors" title="Olvidar recuerdo">
+                        🗑️
+                    </button>
+                </div>
+            `;
+            grid.appendChild(card);
+        }
+
+        // Mostrar errores
+        function showError(msg) {
+            toastMsg.innerText = msg;
+            toast.classList.remove('translate-y-20');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20');
+            }, 4000);
+        }
+
+    </script>
+</body>
+</html>
